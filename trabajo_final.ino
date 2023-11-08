@@ -1,48 +1,48 @@
-const int pinPotenciometro = A0; // El pin analógico donde está conectado el potenciómetro
-int valorMapeado=0; // Variable para almacenar el valor mapeado
-int PULSADOR_START = 4;
-int PULSADOR_STOP = 3;
-int valorPulsadorStart = 0;
-int valorPulsadorStop = 0 ;
-boolean leerPotenciometro = false;
+const int pinPotentiometer = A0; // The analog pin where the potentiometer is connected
+int mappedValue = 0; // Variable to store the mapped value
+int START_BUTTON = 4;
+int STOP_BUTTON = 3;
+bool isStartButtonPressed = false;
+bool isStopButtonPressed = false;
+bool runProgram = false;
+bool programRunning = false;
+
 void setup() {
-  Serial.begin(9600); // Inicia la comunicación serial a 9600 baudios
-  pinMode(PULSADOR_START,INPUT_PULLUP);
-  pinMode(PULSADOR_STOP,INPUT_PULLUP);
+  Serial.begin(9600); // Initialize serial communication at 9600 baud
+  pinMode(START_BUTTON, INPUT_PULLUP);
+  pinMode(STOP_BUTTON, INPUT_PULLUP);
 }
 
 void loop() {
- 
-  //mapearPotenciometro();
-  leerBotonStart();
-  leerBotonStop();
-  if(leerPotenciometro){
-    mapearPotenciometro();
-  }
-  valorPulsadorStart =  digitalRead(PULSADOR_START);
-  valorPulsadorStop = digitalRead(PULSADOR_STOP);
- 
-  delay(100); // Espera un breve periodo de tiempo antes de volver a leer el potenciómetro
-}
-void mapearPotenciometro(){
-   int valorPotenciometro = analogRead(pinPotenciometro); // Lee el valor del potenciómetro (0-1023)
+  isStartButtonPressed = readButton(START_BUTTON);
+  isStopButtonPressed = readButton(STOP_BUTTON);
 
-  // Mapea el valor del potenciómetro al rango de 30 a 90
-  valorMapeado = map(valorPotenciometro, 0, 1023, 30, 90);
-  Serial.print("Valor del potenciómetro: ");
-  Serial.print(valorPotenciometro);
-  Serial.print(" - Valor mapeado: ");
-  Serial.println(valorMapeado);
-}
-void leerBotonStart(){
-  if(digitalRead(PULSADOR_START)==LOW){
-    Serial.println("Se activo boton start");
-    leerPotenciometro = true;
+  if (isStartButtonPressed && !isStopButtonPressed && !programRunning) {
+    programRunning = true;
+    runProgram = true;
+  } else if (isStopButtonPressed) {
+    programRunning = false;
+    runProgram = false;
   }
-}
-void leerBotonStop(){
-  if(digitalRead(PULSADOR_STOP)==LOW){
-    Serial.println("Se activo boton stop");
-    leerPotenciometro = false;
+
+  if (runProgram) {
+    mapPotentiometer();
   }
+
+  delay(100); // Wait for a short period of time before reading the potentiometer again
+}
+
+void mapPotentiometer() {
+  int potentiometerValue = analogRead(pinPotentiometer); // Read the potentiometer value (0-1023)
+
+  // Map the potentiometer value to the range of 30 to 90
+  mappedValue = map(potentiometerValue, 0, 1023, 30, 90);
+  Serial.print("Potentiometer value: ");
+  Serial.print(potentiometerValue);
+  Serial.print(" - Mapped value: ");
+  Serial.println(mappedValue);
+}
+
+bool readButton(int pin) {
+  return digitalRead(pin) == LOW;
 }
